@@ -46,124 +46,126 @@ Note:- Both files must be in same namespace
 
 
 3) Changes in Account Controller
------------------------------
+--------------------------------------
 
 i) Default Page for login:
 
-public ActionResult Index() { return View(); }
+	public ActionResult Index() {
+		return View();
+	}
 
 
 ii) Create View as following
 
- @{
- 	ViewBag.Title = "Index";
- }
+	 @{
+		ViewBag.Title = "Index";
+	 }
 
- <h2>Login</h2>
- <div style="margin-top:20px">
+	 <h2>Login</h2>
+	 <div style="margin-top:20px">
 
- </div>
- <div class="row" style="margin-top:20px;">
- 	<div class="col-md-5"> 
- 		<p>
- 			<a class="btn btn-default btn-block" href="@Url.Action("SignIn", new { type = "Google" })"><i class="fa fa-google"></i>&nbsp;&nbsp;Login using Google</a>
- 		</p>
- 	</div>
+	 </div>
+	 <div class="row" style="margin-top:20px;">
+		<div class="col-md-5"> 
+			<p>
+				<a class="btn btn-default btn-block" href="@Url.Action("SignIn", new { type = "Google" })"><i class="fa fa-google"></i>&nbsp;&nbsp;Login using Google</a>
+			</p>
+		</div>
 
- </div>
+	 </div>
 
 iii) Add Sign in method
 
-public void SignIn(string ReturnUrl = "/", string type = "")
-{
- if (!Request.IsAuthenticated)
- {
-  if (type == "Google")
-  {
-   HttpContext.GetOwinContext().Authentication.Challenge(new AuthenticationProperties { RedirectUri = "Account/GoogleLoginCallback" }, "Google"); 
-  }
- }
-}
+	public void SignIn(string ReturnUrl = "/", string type = "")
+	{
+	 if (!Request.IsAuthenticated)
+	 {
+	  if (type == "Google")
+	  {
+	   HttpContext.GetOwinContext().Authentication.Challenge(new AuthenticationProperties { RedirectUri = "Account/GoogleLoginCallback" }, "Google"); 
+	  }
+	 }
+	}
 
 
 iv) Then Create method For GoogleSignIn Call Back
 
- [AllowAnonymous]
- public ActionResult GoogleLoginCallback()
- {
- 	var claimsPrincipal = HttpContext.User.Identity as ClaimsIdentity;
+	 [AllowAnonymous]
+	 public ActionResult GoogleLoginCallback()
+	 {
+		var claimsPrincipal = HttpContext.User.Identity as ClaimsIdentity;
 
- 	var loginInfo = GoogleLoginViewModel.GetLoginInfo(claimsPrincipal);
- 	if (loginInfo == null)
- 	{
- 		return RedirectToAction("Index");
- 	}
-     
-
- 	MovieEntities db = new MovieEntities();
- 	var user = db.UserAccounts.FirstOrDefault(x => x.Email == loginInfo.emailaddress);
-
- 	if (user == null)
- 	{
- 		user = new UserAccount
- 		{
- 			Email = loginInfo.emailaddress,
- 			GivenName = loginInfo.givenname,
- 			Identifier = loginInfo.nameidentifier,
- 			Name = loginInfo.name,
- 			SurName = loginInfo.surname,
- 			IsActive = true
- 		};
- 		db.UserAccounts.Add(user);
- 		db.SaveChanges();
- 	}
-
- 	var ident = new ClaimsIdentity(
- 			new[] { 
- 							// adding following 2 claim just for supporting default antiforgery provider
- 							new Claim(ClaimTypes.NameIdentifier, user.Email),
- 							new Claim("http://schemas.microsoft.com/accesscontrolservice/2010/07/claims/identityprovider", "ASP.NET Identity", "http://www.w3.org/2001/XMLSchema#string"),
-
- 							new Claim(ClaimTypes.Name, user.Name),
- 							new Claim(ClaimTypes.Email, user.Email),
- 							// optionally you could add roles if any
- 							new Claim(ClaimTypes.Role, "User")
- 			},
- 			CookieAuthenticationDefaults.AuthenticationType);
+		var loginInfo = GoogleLoginViewModel.GetLoginInfo(claimsPrincipal);
+		if (loginInfo == null)
+		{
+			return RedirectToAction("Index");
+		}
 
 
- 	HttpContext.GetOwinContext().Authentication.SignIn(
- 				new AuthenticationProperties { IsPersistent = false }, ident);
- 	return Redirect("~/");
+		MovieEntities db = new MovieEntities();
+		var user = db.UserAccounts.FirstOrDefault(x => x.Email == loginInfo.emailaddress);
 
- }
+		if (user == null)
+		{
+			user = new UserAccount
+			{
+				Email = loginInfo.emailaddress,
+				GivenName = loginInfo.givenname,
+				Identifier = loginInfo.nameidentifier,
+				Name = loginInfo.name,
+				SurName = loginInfo.surname,
+				IsActive = true
+			};
+			db.UserAccounts.Add(user);
+			db.SaveChanges();
+		}
+
+		var ident = new ClaimsIdentity(
+				new[] { 
+								// adding following 2 claim just for supporting default antiforgery provider
+								new Claim(ClaimTypes.NameIdentifier, user.Email),
+								new Claim("http://schemas.microsoft.com/accesscontrolservice/2010/07/claims/identityprovider", "ASP.NET Identity", "http://www.w3.org/2001/XMLSchema#string"),
+
+								new Claim(ClaimTypes.Name, user.Name),
+								new Claim(ClaimTypes.Email, user.Email),
+								// optionally you could add roles if any
+								new Claim(ClaimTypes.Role, "User")
+				},
+				CookieAuthenticationDefaults.AuthenticationType);
+
+
+		HttpContext.GetOwinContext().Authentication.SignIn(
+					new AuthenticationProperties { IsPersistent = false }, ident);
+		return Redirect("~/");
+
+	 }
 
 4) ViewModel and Database
 
 i) GoogleLogin ViewModel Class should be like this
 
-public class GoogleLoginViewModel {
- public string emailaddress { get; set; }
- public string name { get; set; }
- public string givenname { get; set; }
- public string surname { get; set; }
- public string nameidentifier { get; set; }
+	public class GoogleLoginViewModel {
+	 public string emailaddress { get; set; }
+	 public string name { get; set; }
+	 public string givenname { get; set; }
+	 public string surname { get; set; }
+	 public string nameidentifier { get; set; }
 
- internal static GoogleLoginViewModel GetLoginInfo(ClaimsIdentity identity)
- {
- 	if(identity.Claims.Count() == 0 || identity.Claims.FirstOrDefault(x=> x.Type == ClaimTypes.Email) == null)
- 	{
- 		return null;
- 	}
+	 internal static GoogleLoginViewModel GetLoginInfo(ClaimsIdentity identity)
+	 {
+		if(identity.Claims.Count() == 0 || identity.Claims.FirstOrDefault(x=> x.Type == ClaimTypes.Email) == null)
+		{
+			return null;
+		}
 
- 	return new GoogleLoginViewModel
- 	{
- 		emailaddress = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value,
- 		name = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value,
- 		givenname = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName).Value,
- 		surname = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname).Value,
- 		nameidentifier = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value,
- 	};
- }
-}
+		return new GoogleLoginViewModel
+		{
+			emailaddress = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value,
+			name = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value,
+			givenname = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName).Value,
+			surname = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname).Value,
+			nameidentifier = identity.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value,
+		};
+	 }
+	}
 
