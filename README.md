@@ -169,9 +169,9 @@ iv) Then Create method For GoogleSignIn Call Back
 			}
 
 
-			MovieEntities db = new MovieEntities();
-			var user = db.UserAccounts.FirstOrDefault(x => x.Email == loginInfo.emailaddress);
-
+			 WebEntities db = new WebEntities(); //DbContext
+           		 var user = db.UserAccounts.FirstOrDefault(x => x.Email == loginInfo.emailaddress);
+			 
 			if (user == null)
 			{
 				user = new UserAccount
