@@ -1,7 +1,7 @@
 ﻿# Guide for custom google login in MVC without default Identity
 -------------------------------------------------------
 Create google app key and seceret, [Follow the instruction here](https://developers.google.com/identity/sign-in/web/devconsole-project)
-set callback url to http://localhost:3002/GoogleLoginCallback
+set callback url to [http://localhost:3002/GoogleLoginCallback](#)
 
 Create one MVC application with no Authentication Selected.
 
