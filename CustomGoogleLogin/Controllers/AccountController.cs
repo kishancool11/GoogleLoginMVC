@@ -26,7 +26,12 @@ namespace CustomGoogleLogin.Controllers
                 }
             }
         }
-
+	public ActionResult SignOut()
+        {
+            HttpContext.GetOwinContext().Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+            return Redirect("~/");
+        }
+	
         [AllowAnonymous]
         public ActionResult GoogleLoginCallback()
         {
