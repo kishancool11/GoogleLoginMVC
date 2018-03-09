@@ -18,7 +18,7 @@ For CookieAuthenticationDefaults.AuthenticationType
 # 2) Configuration
 
 i)  Add Owin Startup Class file "Startup.cs" in route folder of application, if not already exist.
-Then add a class file in App_Data folder with name Startup.Auth.cs 
+Then add a class file in App_Start folder with name Startup.Auth.cs 
 
 ii) Add following code in Startup.Auth.cs file
 
